@@ -1,15 +1,21 @@
 import React from 'react'
 import Reorder from 'react-reorder'
+import styles from './ReorderableDriverList.module.scss'
 
 class ReorderableDriverList extends React.Component {
 
   render() {
     return (
-      <Reorder reorderId="drivers" onReorder={this.props.onReorder.bind(this)}>
+      <Reorder
+        className={styles.reorderableDriverList}
+        reorderId="drivers"
+        onReorder={this.props.onReorder.bind(this)}
+        holdTime={500}
+      >
         {
           this.props.driverList.map((driverCode, i) => (
-            <div>
-              <h3>{i + 1}: {driverCode} +{this.props.pointsDistribution[i]}</h3>
+            <div className={styles.driver}>
+              <p>{i + 1}: {driverCode} +{this.props.pointsDistribution[i]}</p>
             </div>
           ))
         }

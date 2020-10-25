@@ -1,4 +1,5 @@
 import React from 'react'
+import styles from './LiveTeamStandings.module.scss'
 
 class LiveTeamStandings extends React.Component {
 
@@ -175,9 +176,9 @@ class LiveTeamStandings extends React.Component {
   }
 
   render() {
-    const liveTeamStandings = this.pointsMap().sort((team1, team2) => team2[1] - team1[1]).map(team => <h3>{team[0]}: {team[1]}</h3>)
+    const liveTeamStandings = this.pointsMap().sort((team1, team2) => team2[1] - team1[1]).map((team, i) => <p>{i + 1}: {team[0]} - {team[1]}</p>)
     return (
-      <ul>{liveTeamStandings}</ul>
+      <div className={styles.team}>{liveTeamStandings}</div>
     )
   }
 }
