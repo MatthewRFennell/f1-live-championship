@@ -3,160 +3,29 @@ import styles from './LiveTeamStandings.module.scss'
 
 class LiveTeamStandings extends React.Component {
 
-  teams = [
-    {
-      "Name": "Mercedes",
-      "Drivers": [
-        {
-          "Code": "HAM",
-          "Points": "230"
-        },
-        {
-          "Code": "BOT",
-          "Points": "161"
-        },
-      ],
-      "PointsDeducted": "0",
-    },
-    {
-      "Name": "Red Bull",
-      "Drivers": [
-        {
-          "Code": "VER",
-          "Points": "147"
-        },
-        {
-          "Code": "ALB",
-          "Points": "64"
-        },
-      ],
-      "PointsDeducted": "0",
-    },
-    {
-      "Name": "Racing Point",
-      "Drivers": [
-        {
-          "Code": "PER",
-          "Points": "68"
-        },
-        {
-          "Code": "STR",
-          "Points": "57"
-        },
-        {
-          "Code": "HUL",
-          "Points": "10"
-        },
-      ],
-      "PointsDeducted": "15"
-    },
-    {
-      "Name": "McLaren",
-      "Drivers": [
-        {
-          "Code": "NOR",
-          "Points": "65"
-        },
-        {
-          "Code": "SAI",
-          "Points": "51"
-        },
-      ],
-      "PointsDeducted": "0",
-    },
-    {
-      "Name": "Renault",
-      "Drivers": [
-        {
-          "Code": "RIC",
-          "Points": "78"
-        },
-        {
-          "Code": "OCO",
-          "Points": "36"
-        },
-      ],
-      "PointsDeducted": "0",
-    },
-    {
-      "Name": "Ferrari",
-      "Drivers": [
-        {
-          "Code": "LEC",
-          "Points": "63"
-        },
-        {
-          "Code": "VET",
-          "Points": "17"
-        },
-      ],
-      "PointsDeducted": "0",
-    },
-    {
-      "Name": "AlphaTauri",
-      "Drivers": [
-        {
-          "Code": "GAS",
-          "Points": "53"
-        },
-        {
-          "Code": "KVY",
-          "Points": "14"
-        },
-      ],
-      "PointsDeducted": "0",
-    },
-    {
-      "Name": "Alfa Romeo",
-      "Drivers": [
-        {
-          "Code": "GIO",
-          "Points": "3"
-        },
-        {
-          "Code": "RAI",
-          "Points": "2"
-        },
-      ],
-      "PointsDeducted": "0",
-    },
-    {
-      "Name": "Haas",
-      "Drivers": [
-        {
-          "Code": "GRO",
-          "Points": "2"
-        },
-        {
-          "Code": "MAG",
-          "Points": "1"
-        },
-      ],
-      "PointsDeducted": "0",
-    },
-    {
-      "Name": "Williams",
-      "Drivers": [
-        {
-          "Code": "LAT",
-          "Points": "0"
-        },
-        {
-          "Code": "RUS",
-          "Points": "0"
-        },
-      ],
-      "PointsDeducted": "0",
-    },
-  ]
+  state = {
+    constructorStandings: [],
+  }
+
+  componentDidMount() {
+    fetch('http://ergast.com/api/f1/current/constructorStandings.json')
+        .then(res => res.json())
+        .then(data => data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings)
+        .then(data => data.map(constructor => {
+          return {
+            id: constructor.Constructor.constructorId,
+            name: constructor.Constructor.name,
+            points: constructor.points,
+          }
+        }))
+        .then(data => this.setState({ constructorStandings: data }))
+  }
 
   todaysPointsOf(team) {
-    const driversOfTeam = team["Drivers"].map((driver) => driver["Code"])
+    const driversOfTeam = this.pointsMap().find(constructor => constructor.id === team).drivers
     const assignedPoints = this.props.driverList.map((code, i) =>
       [code, this.props.pointsDistribution[i]]
     )
-    console.log(assignedPoints)
-    console.log(driversOfTeam)
     const teamPoints = assignedPoints.filter((driver) =>
       driversOfTeam.includes(driver[0])
     )
@@ -164,19 +33,28 @@ class LiveTeamStandings extends React.Component {
                      .reduce((sum, current) => sum + current, 0)
   }
 
-  combinedPointsOf(team) {
-    const drivers = team["Drivers"]
-    return drivers.map((driver) => +driver["Points"])
-                  .reduce((sum, current) => sum + current, 0) - team["PointsDeducted"] + this.todaysPointsOf(team)
-    
+  pointsMap() {
+    return this.state.constructorStandings.map((constructor) => {
+      return {
+        id: constructor.id,
+        name: constructor.name,
+        points: constructor.points,
+        drivers: this.props.constructorsOfDrivers.filter(driver => driver.constructorId === constructor.id).map(driver => driver.code)
+      }
+    })
   }
 
-  pointsMap() {
-    return this.teams.map((team) => [team["Name"], this.combinedPointsOf(team)])
+  livePoints() {
+    return this.pointsMap().map(constructor => {
+      return {
+        name: constructor.name,
+        points: parseInt(constructor.points) + parseInt(this.todaysPointsOf(constructor.id))
+      }
+    })
   }
 
   render() {
-    const liveTeamStandings = this.pointsMap().sort((team1, team2) => team2[1] - team1[1]).map((team, i) => <p>{i + 1}: {team[0]} - {team[1]}</p>)
+    const liveTeamStandings = this.livePoints().sort((team1, team2) => team2.points - team1.points).map((team, i) => <p>{i + 1}: {team.name} - {team.points}</p>)
     return (
       <div className={styles.team}>{liveTeamStandings}</div>
     )
