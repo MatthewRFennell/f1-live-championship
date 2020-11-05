@@ -66,7 +66,7 @@ class LiveTeamStandings extends React.Component {
         positionsGained: this.originalPositionOf(team.id) - (currentPosition + 1)
       }
     })
-    const liveTeamStandings = teamData.map((team, i) => <p>({team.positionsGained}) {i + 1}: {team.name} - {team.points}</p>)
+    const liveTeamStandings = teamData.map((team, i) => <p>({team.positionsGained}) {i + 1}: {team.name} - {team.points} (+{this.todaysPointsOf(team.id)})</p>)
     return (
       <div className={styles.team}>{liveTeamStandings}</div>
     )
