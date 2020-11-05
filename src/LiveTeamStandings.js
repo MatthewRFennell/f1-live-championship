@@ -16,6 +16,7 @@ class LiveTeamStandings extends React.Component {
             id: constructor.Constructor.constructorId,
             name: constructor.Constructor.name,
             points: constructor.points,
+            originalPosition: constructor.position,
           }
         }))
         .then(data => this.setState({ constructorStandings: data }))
@@ -48,13 +49,24 @@ class LiveTeamStandings extends React.Component {
     return this.pointsMap().map(constructor => {
       return {
         name: constructor.name,
+        id: constructor.id,
         points: parseInt(constructor.points) + parseInt(this.todaysPointsOf(constructor.id))
       }
     })
   }
 
+  originalPositionOf(team) {
+    return this.state.constructorStandings.find(constructor => constructor.id === team).originalPosition
+  }
+
   render() {
-    const liveTeamStandings = this.livePoints().sort((team1, team2) => team2.points - team1.points).map((team, i) => <p>{i + 1}: {team.name} - {team.points}</p>)
+    const teamData = this.livePoints().sort((team1, team2) => team2.points - team1.points).map((team, currentPosition) => {
+      return {
+        ...team,
+        positionsGained: this.originalPositionOf(team.id) - (currentPosition + 1)
+      }
+    })
+    const liveTeamStandings = teamData.map((team, i) => <p>({team.positionsGained}) {i + 1}: {team.name} - {team.points}</p>)
     return (
       <div className={styles.team}>{liveTeamStandings}</div>
     )

@@ -45,7 +45,7 @@ class StandingsContainer extends React.Component {
     return (
       <div style={{display: "flex"}}>
         <ReorderableDriverList pointsDistribution={this.pointsDistribution} onReorder={this.onReorder} driverList={this.state.driverList} />
-        { <LiveTeamStandings constructorsOfDrivers={this.state.constructorsOfDrivers} pointsDistribution={this.pointsDistribution} driverList={this.state.driverList} /> }
+        <LiveTeamStandings constructorsOfDrivers={this.state.constructorsOfDrivers} pointsDistribution={this.pointsDistribution} driverList={this.state.driverList} />
       </div>
     )
   }
